@@ -1,15 +1,23 @@
 package slice
 
-import "log"
+import (
+	"log"
+	"sync"
+)
 
 func Iter[T any](sli []T) *Wrapper[T] {
-	return &Wrapper[T]{
-		inner:     sli,
-		start:     0,
-		end:       len(sli),
-		funcChain: make([]any, 0, 3),
-		collected: make([]T, 0, 5),
-	}
+	w := pool.Get().(*Wrapper[T])
+	w.inner = sli
+	w.start, w.end = 0, len(sli)
+	w.funcChain = make([]any, 3)
+	w.collected = make([]T, 0, 5)
+	return w
+}
+
+var pool = sync.Pool{
+	New: func() any {
+		return new(Wrapper[any])
+	},
 }
 
 type Wrapper[T any] struct {
@@ -49,15 +57,22 @@ func (w *Wrapper[T]) ForEach(handle func(*T)) {
 }
 
 func (w *Wrapper[T]) Find(qualified func(T) bool) *T {
+	defer func() {
+		pool.Put(w)
+	}()
 	for i := w.start; i < w.end; i++ {
 		if qualified(w.inner[i]) {
-			return &w.inner[i]
+			q := w.inner[i]
+			return &q
 		}
 	}
 	return nil
 }
 
 func (w *Wrapper[T]) Count() int {
+	defer func() {
+		pool.Put(w)
+	}()
 	exec_funcChain(w)
 	return len(w.collected)
 }
@@ -66,9 +81,16 @@ func (w *Wrapper[T]) Count() int {
 func (w *Wrapper[T]) Zip() {
 }
 
+// Collect will return the current slice, which has been copied from
+// the Wrapper's inner(that has been dealed with chainFuncs).
 func (w *Wrapper[T]) Collect() []T {
+	defer func() {
+		pool.Put(w)
+	}()
 	exec_funcChain(w)
-	return w.collected
+	collected := make([]T, len(w.collected))
+	copy(collected, w.collected)
+	return collected
 }
 
 // TODO: whether save Sum or not
