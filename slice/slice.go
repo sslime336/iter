@@ -1,16 +1,13 @@
 package slice
 
 import (
+	"errors"
 	"log"
-	"sync"
+
+	"github.com/sslime336/iter"
 )
 
-func Iter[T any](sli []T) *Wrapper[T] {
-	// w := pool.Get().(*Wrapper[T])
-	// w.inner = sli
-	// w.start, w.end = 0, len(sli)
-	// w.funcChain = make([]any, 3)
-	// w.collected = make([]T, 0, 5)
+func Iter[T any](sli []T) iter.SliceIter[T] {
 	return &Wrapper[T]{
 		inner:     sli,
 		start:     0,
@@ -20,18 +17,6 @@ func Iter[T any](sli []T) *Wrapper[T] {
 	}
 }
 
-/*
-	sync.Pool does not fit!
- */
-
-type SlicePool[T any] struct {
-	sync.Pool
-}
-
-type typMapper[T comparable] struct {
-	list map[T]SlicePool[T]
-}
-
 type Wrapper[T any] struct {
 	inner      []T
 	start, end int
@@ -39,7 +24,11 @@ type Wrapper[T any] struct {
 	collected  []T
 }
 
-func (w *Wrapper[T]) Range(start, end int) *Wrapper[T] {
+func (w *Wrapper[T]) Unwrap() []T {
+	return w.inner
+}
+
+func (w *Wrapper[T]) Range(start, end int) iter.SliceIter[T] {
 	defer func() {
 		if p := recover(); p != nil {
 			log.Println(p)
@@ -52,12 +41,12 @@ func (w *Wrapper[T]) Range(start, end int) *Wrapper[T] {
 	return w
 }
 
-func (w *Wrapper[T]) Filter(filterFunc func(T) bool) *Wrapper[T] {
+func (w *Wrapper[T]) Filter(filterFunc func(T) bool) iter.SliceIter[T] {
 	w.funcChain = append(w.funcChain, filterFunc)
 	return w
 }
 
-func (w *Wrapper[T]) Map(mapFunc func(*T)) *Wrapper[T] {
+func (w *Wrapper[T]) Map(mapFunc func(*T)) iter.SliceIter[T] {
 	w.funcChain = append(w.funcChain, mapFunc)
 	return w
 }
@@ -68,17 +57,17 @@ func (w *Wrapper[T]) ForEach(handle func(*T)) {
 	}
 }
 
-func (w *Wrapper[T]) Find(qualified func(T) bool) *T {
+func (w *Wrapper[T]) Find(qualified func(T) bool) (*T, error) {
 	// defer func() {
 	// 	pool.Put(w)
 	// }()
 	for i := w.start; i < w.end; i++ {
 		if qualified(w.inner[i]) {
 			q := w.inner[i]
-			return &q
+			return &q, nil
 		}
 	}
-	return nil
+	return nil, errors.New("not found")
 }
 
 func (w *Wrapper[T]) Count() int {

@@ -1,37 +1,26 @@
 package iter
 
-import "github.com/sslime336/iter/slice"
-
 type Iterator[T any] interface {
 	// SliceIter[T]
-	// ArrayIter[T]
+	// HashMapIter[K, V]
 }
 
 type SliceIter[T any] interface {
-	Range(int, int) *slice.Wrapper[T]
-	Filter(func(T) bool) *slice.Wrapper[T]
-	Map(func(*T)) *slice.Wrapper[T]
+	Range(int, int) SliceIter[T]
+	Filter(func(T) bool) SliceIter[T]
+	Map(func(*T)) SliceIter[T]
 	ForEach(func(*T))
-	Find(func(T) bool) T
-	Count()
-	Zip()
+	Find(func(T) bool) (*T, error)
+	Count() int
 	Collect() []T
-	Sum()
+	Unwrap() []T
 }
 
-type ArrayIter[T any] interface {
-	Range(int, int)
-	Filter(func(T) bool)
-	Map(func(*T))
-	ForEach(func(*T))
-	Find(func(T) bool)
-	Count()
-	Zip()
-	Collect()
-	Sum()
-}
+// ArrayIter was deleted, as array can use arr[:] to use.
+// Like slice.Iter(arr[:]).
 
+// TODO: save or not
 type HashMapIter[K comparable, V any] interface {
-	Count()
-	Collect()
+	Keys() SliceIter[K]
+	Values() SliceIter[V]
 }
