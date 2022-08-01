@@ -21,12 +21,9 @@ func TestWrapper(t *testing.T) {
 	}
 	_pool.Put(s)
 
-	s2, ok2 := _pool.Get().(*Wrapper[int])
-	if !ok2 {
-		fmt.Println("not ok2")
-	} else {
-		fmt.Println("ok2")
-	}
+	s2, ok := _pool.Get().(*Wrapper[int])
+	s2.collected = []int{1}
+	fmt.Println(s2.collected)
 	_pool.Put(s2)
 }
 

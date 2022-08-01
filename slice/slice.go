@@ -6,18 +6,30 @@ import (
 )
 
 func Iter[T any](sli []T) *Wrapper[T] {
-	w := pool.Get().(*Wrapper[T])
-	w.inner = sli
-	w.start, w.end = 0, len(sli)
-	w.funcChain = make([]any, 3)
-	w.collected = make([]T, 0, 5)
-	return w
+	// w := pool.Get().(*Wrapper[T])
+	// w.inner = sli
+	// w.start, w.end = 0, len(sli)
+	// w.funcChain = make([]any, 3)
+	// w.collected = make([]T, 0, 5)
+	return &Wrapper[T]{
+		inner:     sli,
+		start:     0,
+		end:       len(sli),
+		funcChain: make([]any, 3),
+		collected: make([]T, 0, 5),
+	}
 }
 
-var pool = sync.Pool{
-	New: func() any {
-		return new(Wrapper[any])
-	},
+/*
+	sync.Pool does not fit!
+ */
+
+type SlicePool[T any] struct {
+	sync.Pool
+}
+
+type typMapper[T comparable] struct {
+	list map[T]SlicePool[T]
 }
 
 type Wrapper[T any] struct {
@@ -57,9 +69,9 @@ func (w *Wrapper[T]) ForEach(handle func(*T)) {
 }
 
 func (w *Wrapper[T]) Find(qualified func(T) bool) *T {
-	defer func() {
-		pool.Put(w)
-	}()
+	// defer func() {
+	// 	pool.Put(w)
+	// }()
 	for i := w.start; i < w.end; i++ {
 		if qualified(w.inner[i]) {
 			q := w.inner[i]
@@ -70,9 +82,9 @@ func (w *Wrapper[T]) Find(qualified func(T) bool) *T {
 }
 
 func (w *Wrapper[T]) Count() int {
-	defer func() {
-		pool.Put(w)
-	}()
+	// defer func() {
+	// 	pool.Put(w)
+	// }()
 	exec_funcChain(w)
 	return len(w.collected)
 }
@@ -84,9 +96,9 @@ func (w *Wrapper[T]) Zip() {
 // Collect will return the current slice, which has been copied from
 // the Wrapper's inner(that has been dealed with chainFuncs).
 func (w *Wrapper[T]) Collect() []T {
-	defer func() {
-		pool.Put(w)
-	}()
+	// defer func() {
+	// 	pool.Put(w)
+	// }()
 	exec_funcChain(w)
 	collected := make([]T, len(w.collected))
 	copy(collected, w.collected)
