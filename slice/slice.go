@@ -58,9 +58,6 @@ func (w *Wrapper[T]) ForEach(handle func(*T)) {
 }
 
 func (w *Wrapper[T]) Find(qualified func(T) bool) (*T, error) {
-	// defer func() {
-	// 	pool.Put(w)
-	// }()
 	for i := w.start; i < w.end; i++ {
 		if qualified(w.inner[i]) {
 			q := w.inner[i]
@@ -71,23 +68,33 @@ func (w *Wrapper[T]) Find(qualified func(T) bool) (*T, error) {
 }
 
 func (w *Wrapper[T]) Count() int {
-	// defer func() {
-	// 	pool.Put(w)
-	// }()
 	exec_funcChain(w)
 	return len(w.collected)
 }
 
-// TODO: how to achieve
-func (w *Wrapper[T]) Zip() {
+// Zip combines two slices, keys and vals.
+// The type of vals will be convert into the pointer of its type as
+// it's easy to achieve, but is not appropriate.
+func Zip[K comparable, V any](keys []K, vals []V) (map[K]*V, error) {
+	klen, vlen := len(keys), len(vals)
+	if vlen > klen {
+		return nil, errors.New("values is more than keys")
+	}
+	hp := make(map[K]*V, klen)
+	containV := append([]V(nil), vals...)
+	for i := 0; i < klen; i++ {
+		if i < vlen {
+			hp[keys[i]] = &containV[i]
+		} else {
+			hp[keys[i]] = nil
+		}
+	}
+	return hp, nil
 }
 
 // Collect will return the current slice, which has been copied from
 // the Wrapper's inner(that has been dealed with chainFuncs).
 func (w *Wrapper[T]) Collect() []T {
-	// defer func() {
-	// 	pool.Put(w)
-	// }()
 	exec_funcChain(w)
 	collected := make([]T, len(w.collected))
 	copy(collected, w.collected)
