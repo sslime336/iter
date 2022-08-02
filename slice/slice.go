@@ -2,9 +2,9 @@ package slice
 
 import (
 	"errors"
-	"log"
 
 	"github.com/sslime336/iter"
+	"github.com/sslime336/iter/logger"
 )
 
 func Iter[T any](sli []T) iter.SliceIter[T] {
@@ -31,7 +31,7 @@ func (w *Wrapper[T]) Unwrap() []T {
 func (w *Wrapper[T]) Range(start, end int) iter.SliceIter[T] {
 	defer func() {
 		if p := recover(); p != nil {
-			log.Println(p)
+			logger.Error(p)
 		}
 	}()
 	if start < 0 || end < 0 || start > end {
@@ -79,6 +79,8 @@ func ZipPtr[K comparable, V any](keys []K, vals []V) (map[K]*V, error) {
 	klen, vlen := len(keys), len(vals)
 	if vlen > klen {
 		return nil, errors.New("values is more than keys")
+	} else if vlen < klen {
+		logger.Warn("the number of keys and values is not matched, keys are more")
 	}
 	hp := make(map[K]*V, klen)
 	containV := append([]V(nil), vals...)
@@ -117,8 +119,12 @@ func (w *Wrapper[T]) Collect() []T {
 }
 
 // TODO: whether save Sum or not
-func (w *Wrapper[T]) Sum() {
+func Sum[T operatable](slice []T) int64 {
+	return int64(0)
+}
 
+type operatable interface {
+	// TODO: finish this
 }
 
 func exec_funcChain[T any](b *Wrapper[T]) {
@@ -135,7 +141,7 @@ func exec_funcChain[T any](b *Wrapper[T]) {
 				}
 			}
 		default:
-			panic("unmatched func type")
+			logger.Error("unmatched func type")
 		}
 	}
 }
