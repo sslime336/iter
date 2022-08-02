@@ -72,10 +72,10 @@ func (w *Wrapper[T]) Count() int {
 	return len(w.collected)
 }
 
-// Zip combines two slices, keys and vals.
+// ZipPtr combines two slices, keys and vals.
 // The type of vals will be convert into the pointer of its type as
 // it's easy to achieve, but is not appropriate.
-func Zip[K comparable, V any](keys []K, vals []V) (map[K]*V, error) {
+func ZipPtr[K comparable, V any](keys []K, vals []V) (map[K]*V, error) {
 	klen, vlen := len(keys), len(vals)
 	if vlen > klen {
 		return nil, errors.New("values is more than keys")
@@ -88,6 +88,21 @@ func Zip[K comparable, V any](keys []K, vals []V) (map[K]*V, error) {
 		} else {
 			hp[keys[i]] = nil
 		}
+	}
+	return hp, nil
+}
+
+// Zip combines two slices, keys and vals.
+// Diffs from ZipPtr, it will do what it looks like.
+func Zip[K comparable, V any](keys []K, vals []V) (map[K]V, error) {
+	klen, vlen := len(keys), len(vals)
+	if vlen != klen {
+		return nil, errors.New("the number of A and B are not equal")
+	}
+	hp := make(map[K]V, klen)
+	containV := append([]V(nil), vals...)
+	for i := 0; i < klen; i++ {
+		hp[keys[i]] = containV[i]
 	}
 	return hp, nil
 }
