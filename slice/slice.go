@@ -24,6 +24,14 @@ type Wrapper[T any] struct {
 	collected  []T
 }
 
+func (w *Wrapper[T]) Next() (*T, error) {
+	if w.start < w.end {
+		w.start++
+		return &w.inner[w.start], nil
+	}
+	return nil, errors.New("run out of elements")
+}
+
 func (w *Wrapper[T]) Unwrap() []T {
 	return w.inner
 }

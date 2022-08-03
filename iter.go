@@ -6,6 +6,7 @@ type Iterator[T any] interface {
 }
 
 type SliceIter[T any] interface {
+	Next() (*T, error)
 	Range(int, int) SliceIter[T]
 	Filter(func(T) bool) SliceIter[T]
 	Map(func(*T)) SliceIter[T]
