@@ -60,12 +60,16 @@ func (w *Wrapper[T]) Map(mapFunc func(*T)) iter.SliceIter[T] {
 }
 
 func (w *Wrapper[T]) ForEach(handle func(*T)) {
+	exec_funcChain(w)
 	for i := w.start; i < w.end; i++ {
 		handle(&w.inner[i])
 	}
 }
 
+// Find	will return the pointer of the found value.
+// Return nil and error if not found.
 func (w *Wrapper[T]) Find(qualified func(T) bool) (*T, error) {
+	exec_funcChain(w)
 	for i := w.start; i < w.end; i++ {
 		if qualified(w.inner[i]) {
 			q := w.inner[i]
