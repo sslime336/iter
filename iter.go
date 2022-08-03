@@ -17,9 +17,6 @@ type SliceIter[T any] interface {
 	Unwrap() []T
 }
 
-// ArrayIter was deleted, as array can use arr[:] to use.
-// Like slice.Iter(arr[:]).
-
 // TODO: save or not
 type HashMapIter[K comparable, V any] interface {
 	Keys() SliceIter[K]
