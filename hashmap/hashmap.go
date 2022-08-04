@@ -15,10 +15,19 @@ func Iter[K comparable, V any](m map[K]V) iter.HashMapIter[K, V] {
 type Wrapper[K comparable, V any] struct {
 	inner  map[K]V
 	volume int
+	curKey K
+	curVal V
 }
 
-// TODO: whether to do or not
-func (w *Wrapper[K, V]) Next() (key K, value V) {
+// TODO: as this do not guarantee the order of the inner elements,
+// keep this method is under consideration.
+func (w *Wrapper[K, V]) Next() iter.HashMapIter[K, V] {
+	return nil
+}
+
+func (w *Wrapper[K, V]) Unwrap() (key K, val V) {
+	key = w.curKey
+	val = w.curVal
 	return
 }
 

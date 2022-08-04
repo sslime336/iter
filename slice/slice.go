@@ -9,11 +9,12 @@ import (
 
 func Iter[T any](sli []T) iter.SliceIter[T] {
 	return &Wrapper[T]{
-		inner:     sli,
-		start:     0,
-		end:       len(sli),
-		funcChain: make([]any, 3),
-		collected: make([]T, 0, 5),
+		inner:      sli,
+		start:      0,
+		end:        len(sli),
+		funcChain:  make([]any, 3),
+		emptyChain: true,
+		collected:  make([]T, 0, 5),
 	}
 }
 
@@ -21,6 +22,7 @@ type Wrapper[T any] struct {
 	inner      []T
 	start, end int
 	funcChain  []any
+	emptyChain bool
 	collected  []T
 }
 
@@ -50,11 +52,15 @@ func (w *Wrapper[T]) Range(start, end int) iter.SliceIter[T] {
 }
 
 func (w *Wrapper[T]) Filter(filterFunc func(T) bool) iter.SliceIter[T] {
+	// As the field emptyChain is simple, doing this is litte faster,
+	// though logically unsuitable.
+	w.emptyChain = false 
 	w.funcChain = append(w.funcChain, filterFunc)
 	return w
 }
 
 func (w *Wrapper[T]) Map(mapFunc func(*T)) iter.SliceIter[T] {
+	w.emptyChain = false
 	w.funcChain = append(w.funcChain, mapFunc)
 	return w
 }
@@ -140,6 +146,10 @@ type operatable interface {
 }
 
 func exec_funcChain[T any](b *Wrapper[T]) {
+	if b.emptyChain {
+		b.collected = append(b.collected, b.inner...)
+		return
+	}
 	for _, chainFunc := range b.funcChain {
 		switch t := chainFunc.(type) {
 		case /* map functions */ func(*T):

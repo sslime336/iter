@@ -1,7 +1,7 @@
 package hashmap
 
 import (
-	"log"
+	"fmt"
 	"testing"
 )
 
@@ -13,10 +13,21 @@ func TestMap(t *testing.T) {
 		4: "0x4",
 		5: "0x5",
 	}
-	log.Println(Iter(maps).Keys().Unwrap())
+	fmt.Println(Iter(maps).Keys().Unwrap())
 	if found, err := Iter(maps).Values().Find(func(s string) bool {
 		return s == "0x3"
 	}); err == nil {
-		log.Println(*found)
+		fmt.Println(*found)
 	}
+}
+
+func TestMapSlice(t *testing.T) {
+	m := map[string]string{
+		"name":    "Alice",
+		"age":     "17",
+		"gender":  "woman",
+		"address": "unknow",
+		"phone":   "18111101111",
+	}
+	fmt.Println(Iter(m).Keys().Collect())
 }
