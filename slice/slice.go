@@ -26,12 +26,12 @@ type Wrapper[T any] struct {
 	collected  []T
 }
 
-func (w *Wrapper[T]) Next() (*T, error) {
+func (w *Wrapper[T]) Next() (*T, bool) {
 	if w.start < w.end {
 		w.start++
-		return &w.inner[w.start], nil
+		return &w.inner[w.start], true
 	}
-	return nil, errors.New("run out of elements")
+	return nil, false
 }
 
 func (w *Wrapper[T]) Unwrap() []T {
@@ -54,7 +54,7 @@ func (w *Wrapper[T]) Range(start, end int) iter.SliceIter[T] {
 func (w *Wrapper[T]) Filter(filterFunc func(T) bool) iter.SliceIter[T] {
 	// As the field emptyChain is simple, doing this is litte faster,
 	// though logically unsuitable.
-	w.emptyChain = false 
+	w.emptyChain = false
 	w.funcChain = append(w.funcChain, filterFunc)
 	return w
 }
@@ -74,15 +74,15 @@ func (w *Wrapper[T]) ForEach(handle func(*T)) {
 
 // Find	will return the pointer of the found value.
 // Return nil and error if not found.
-func (w *Wrapper[T]) Find(qualified func(T) bool) (*T, error) {
+func (w *Wrapper[T]) Find(qualified func(T) bool) (*T, bool) {
 	exec_funcChain(w)
 	for i := w.start; i < w.end; i++ {
 		if qualified(w.inner[i]) {
 			q := w.inner[i]
-			return &q, nil
+			return &q, true
 		}
 	}
-	return nil, errors.New("not found")
+	return nil, false
 }
 
 func (w *Wrapper[T]) Count() int {

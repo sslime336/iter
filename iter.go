@@ -6,12 +6,12 @@ type Iterator[T any] interface {
 }
 
 type SliceIter[T any] interface {
-	Next() (*T, error)
+	Next() (*T, bool)
 	Range(int, int) SliceIter[T]
 	Filter(func(T) bool) SliceIter[T]
 	Map(func(*T)) SliceIter[T]
 	ForEach(func(*T))
-	Find(func(T) bool) (*T, error)
+	Find(func(T) bool) (*T, bool)
 	Count() int
 	Collect() []T
 	Unwrap() []T

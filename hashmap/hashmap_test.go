@@ -14,9 +14,9 @@ func TestMap(t *testing.T) {
 		5: "0x5",
 	}
 	fmt.Println(Iter(maps).Keys().Unwrap())
-	if found, err := Iter(maps).Values().Find(func(s string) bool {
+	if found, exists := Iter(maps).Values().Find(func(s string) bool {
 		return s == "0x3"
-	}); err == nil {
+	}); exists {
 		fmt.Println(*found)
 	}
 }

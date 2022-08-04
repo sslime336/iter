@@ -20,7 +20,7 @@ type Wrapper[K comparable, V any] struct {
 }
 
 // TODO: as this do not guarantee the order of the inner elements,
-// keep this method is under consideration.
+// keeping this method or not is under consideration.
 func (w *Wrapper[K, V]) Next() iter.HashMapIter[K, V] {
 	return nil
 }

@@ -71,14 +71,14 @@ func TestZip(t *testing.T) {
 
 func TestFind(t *testing.T) {
 	fruits := []string{"Apple", "Banana", "Orange", "Peach"}
-	if qu, err := Iter(fruits).Filter(func(s string) bool {
+	if qu, exists := Iter(fruits).Filter(func(s string) bool {
 		return len(s) >= 6
 	}).Find(func(s string) bool {
 		return len(s) == 5
-	}); err == nil {
+	}); exists {
 		fmt.Println(*qu)
 	} else {
-		fmt.Println(err)
+		fmt.Println("not exists")
 	}
 }
 
