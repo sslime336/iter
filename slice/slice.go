@@ -26,15 +26,27 @@ type wrapper[T any] struct {
 	collected  []T
 }
 
-// Next is useless now?
-func (w *wrapper[T]) Next() (*T, bool) {
+// Next increase the start index of the inner slice.
+// Return true if any elements exists.
+func (w *wrapper[T]) Next() (exists bool) {
 	if w.start < w.end {
 		w.start++
-		return &w.inner[w.start], true
+		exists = true
 	}
-	return nil, false
+	return
 }
 
+// Element return the element on the index start,
+// ok is false if there are no elements in range(start, end).
+func (w *wrapper[T]) Element() (elem T, ok bool) {
+	if w.start < w.end {
+		elem = w.inner[w.start]
+		ok = true
+	}
+	return
+}
+
+// Unwrap return the inner slice of the data
 func (w *wrapper[T]) Unwrap() []T {
 	return w.inner
 }
@@ -52,6 +64,7 @@ func (w *wrapper[T]) Range(start, end int) iter.SliceIter[T] {
 	return w
 }
 
+// Filter will register a filterFunc, which is lazy.
 func (w *wrapper[T]) Filter(filterFunc func(T) bool) iter.SliceIter[T] {
 	// As the field emptyChain is simple, doing this is litte faster,
 	// though logically unsuitable.
@@ -60,12 +73,14 @@ func (w *wrapper[T]) Filter(filterFunc func(T) bool) iter.SliceIter[T] {
 	return w
 }
 
+// Map will register a mapFunc, which is lazy.
 func (w *wrapper[T]) Map(mapFunc func(*T)) iter.SliceIter[T] {
 	w.emptyChain = false
 	w.funcChain = append(w.funcChain, mapFunc)
 	return w
 }
 
+// ForEach will call handle to every element which is in the range(start <= i < end).
 func (w *wrapper[T]) ForEach(handle func(*T)) {
 	exec_funcChain(w)
 	for i := w.start; i < w.end; i++ {

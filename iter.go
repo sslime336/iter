@@ -9,7 +9,8 @@ type Iterator2[K comparable, V any] interface {
 }
 
 type SliceIter[T any] interface {
-	Next() (*T, bool)
+	Next() bool
+	Element() (T, bool)
 	Range(int, int) SliceIter[T]
 	Filter(func(T) bool) SliceIter[T]
 	Map(func(*T)) SliceIter[T]
