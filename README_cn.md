@@ -1,23 +1,22 @@
 # iter
 
-English | [简体中文](README_cn.md)
+[English](README.md) | 简体中文
 
-### About
+### 是什么
 
-Experimental implementation of iterators using Go for **functional programming**.
+使用 Go 实现的实验性质的迭代器，以支持函数式编程
 
-### Warn
+### 警告
 
-Since all of these are experimental, this module should not be used in productive environment.
+所有接口都是试验性的，且不应该运用在生产环境中
 
-### Examples
+### 例子
 
-There are 2 ways to get the iterator.
-1. Generate from existed slice, array or map.
-2. Implement the Iterator interface. You can easily implement the interface by using the function Iter(any) from relevant package.
+这里提供了两种获取 Iterator 对象的方式
+1. 从已经存在的切片、数组或 map 中生成
+2. 给结构体实现相应的迭代器接口。使用已经提供的函数，可以简化迭代器接口的实现
 
-
-[1] Generate from existed slice, array or map.
+[1] 从已经存在的切片、数组或 map 中生成
 
 ```go
 package main
@@ -48,7 +47,7 @@ func main() {
 ```
 
 
-[2] Implement the Iterator / Iterator2 interface.
+[2] 实现 Iterator / Iterator2 接口
 
 ```go
 package main
@@ -91,7 +90,7 @@ func main() {
 
 ### Logger
 
-A WeakLogger interface is provided for inner use, which means you can customize the log output using your favorite logger.
+模块提供了一个 WeakLogger 接口，以在迭代过程中使用你喜欢的日志框架格式化日志信息
 
 ```go
 package main
@@ -107,6 +106,6 @@ func main() {
 
 ```
 
-### Misc
+### 杂项
 
-Keep updating(maybe)...
+持续更新ing...(大概)
