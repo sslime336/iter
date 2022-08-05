@@ -6,6 +6,50 @@ import (
 	"testing"
 )
 
+func TestFindPtr(t *testing.T) {
+	fruits := []string{"Apple", "Banana", "Orange", "Pear"}
+	if fruitPtr, found := Iter(fruits).FindPtr(func(s string) bool {
+		return len(s) == 5
+	}); found {
+		fmt.Println("Fruit has been found:", *fruitPtr)
+		fmt.Println("Is copied?", fruitPtr != &fruits[0])
+	}
+}
+
+func TestNotFindPtr(t *testing.T) {
+	fruits := []string{"Apple", "Banana", "Orange", "Pear"}
+	if fruitPtr, found := Iter(fruits).FindPtr(func(s string) bool {
+		return len(s) > 10
+	}); found {
+		fmt.Println("Fruit has been found:", *fruitPtr)
+		fmt.Println("Is copied?", fruitPtr != &fruits[0])
+	} else {
+		fmt.Println("Not found")
+	}
+}
+
+func TestFind(t *testing.T) {
+	fruits := []string{"Apple", "Banana", "Orange", "Pear"}
+	if fruit, found := Iter(fruits).Find(func(s string) bool {
+		return len(s) == 5
+	}); found {
+		fmt.Println("Fruit has been found:", fruit)
+		fmt.Println("Is copied?", &fruit != &fruits[0])
+	}
+}
+
+func TestNotFind(t *testing.T) {
+	fruits := []string{"Apple", "Banana", "Orange", "Pear"}
+	if fruit, found := Iter(fruits).Find(func(s string) bool {
+		return len(s) > 10
+	}); found {
+		fmt.Println("Fruit has been found:", fruit)
+		fmt.Println("Is copied?", &fruit != &fruits[0])
+	} else {
+		fmt.Println("Not found")
+	}
+}
+
 func TestForEach(t *testing.T) {
 	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
 	Iter(nums).ForEach(func(t *int) {
@@ -67,19 +111,6 @@ func TestZip(t *testing.T) {
 	res2, _ := Zip(keys, vals2)
 	log.Printf("zip: %+v", res1)
 	log.Printf("zip2: %+v", res2)
-}
-
-func TestFind(t *testing.T) {
-	fruits := []string{"Apple", "Banana", "Orange", "Peach"}
-	if qu, exists := Iter(fruits).Filter(func(s string) bool {
-		return len(s) >= 6
-	}).Find(func(s string) bool {
-		return len(s) == 5
-	}); exists {
-		fmt.Println(*qu)
-	} else {
-		fmt.Println("not exists")
-	}
 }
 
 func TestCollect(t *testing.T) {

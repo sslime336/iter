@@ -17,7 +17,7 @@ func TestMap(t *testing.T) {
 	if found, exists := Iter(maps).Values().Find(func(s string) bool {
 		return s == "0x3"
 	}); exists {
-		fmt.Println(*found)
+		fmt.Println(found)
 	}
 }
 

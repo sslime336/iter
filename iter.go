@@ -11,7 +11,8 @@ type SliceIter[T any] interface {
 	Filter(func(T) bool) SliceIter[T]
 	Map(func(*T)) SliceIter[T]
 	ForEach(func(*T))
-	Find(func(T) bool) (*T, bool)
+	Find(func(T) bool) (T, bool)
+	FindPtr(func(T) bool) (*T, bool)
 	Count() int
 	Collect() []T
 	Unwrap() []T

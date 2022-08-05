@@ -26,6 +26,7 @@ type Wrapper[T any] struct {
 	collected  []T
 }
 
+// Next is useless now?
 func (w *Wrapper[T]) Next() (*T, bool) {
 	if w.start < w.end {
 		w.start++
@@ -72,17 +73,29 @@ func (w *Wrapper[T]) ForEach(handle func(*T)) {
 	}
 }
 
-// Find	will return the pointer of the found value.
-// Return nil and error if not found.
-func (w *Wrapper[T]) Find(qualified func(T) bool) (*T, bool) {
+// FindPtr will return the pointer of the found value.
+// Return nil and false if not found.
+func (w *Wrapper[T]) FindPtr(qualified func(T) bool) (*T, bool) {
 	exec_funcChain(w)
 	for i := w.start; i < w.end; i++ {
 		if qualified(w.inner[i]) {
-			q := w.inner[i]
-			return &q, true
+			return &w.inner[i], true
 		}
 	}
 	return nil, false
+}
+
+// Find will return the copy of the T, if found, the param `found`
+// will be true
+func (w *Wrapper[T]) Find(qualified func(T) bool) (res T, found bool) {
+	exec_funcChain(w)
+	for i := w.start; i < w.end; i++ {
+		if qualified(w.inner[i]) {
+			res, found = w.inner[i], true
+			return
+		}
+	}
+	return
 }
 
 func (w *Wrapper[T]) Count() int {
@@ -143,6 +156,9 @@ func Sum[T operatable](slice []T) int64 {
 
 type operatable interface {
 	// TODO: finish this
+	~uint8 | ~int8 | ~uint16 | ~int16 | ~uint32 |
+		~int32 | ~uint64 | ~int64 | ~uint | ~int |
+		~float32 | ~float64 | ~complex64 | ~complex128
 }
 
 func exec_funcChain[T any](b *Wrapper[T]) {
