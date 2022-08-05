@@ -9,20 +9,21 @@ import (
 
 func Iter[T any](sli []T) iter.SliceIter[T] {
 	return &wrapper[T]{
-		inner:      sli,
-		start:      0,
-		end:        len(sli),
-		funcChain:  make([]any, 3),
-		emptyChain: true,
-		collected:  make([]T, 0, 5),
+		inner:     sli,
+		start:     0,
+		end:       len(sli),
+		fixed:     len(sli),
+		funcChain: make([]any, 0, 3),
+		collected: sli,
 	}
 }
 
 type wrapper[T any] struct {
 	inner      []T
+	fixed      int // inner's primitive size
 	start, end int
+	moved      bool
 	funcChain  []any
-	emptyChain bool
 	collected  []T
 }
 
@@ -30,7 +31,11 @@ type wrapper[T any] struct {
 // Return true if any elements exists.
 func (w *wrapper[T]) Next() (exists bool) {
 	if w.start < w.end {
-		w.start++
+		if !w.moved {
+			w.moved = true
+		} else {
+			w.start++
+		}
 		exists = true
 	}
 	return
@@ -57,7 +62,7 @@ func (w *wrapper[T]) Range(start, end int) iter.SliceIter[T] {
 			logger.Error(p)
 		}
 	}()
-	if start < 0 || end < 0 || start > end {
+	if start < 0 || end < 0 || start > end || end > w.fixed {
 		panic("illegal range")
 	}
 	w.start, w.end = start, end
@@ -66,16 +71,12 @@ func (w *wrapper[T]) Range(start, end int) iter.SliceIter[T] {
 
 // Filter will register a filterFunc, which is lazy.
 func (w *wrapper[T]) Filter(filterFunc func(T) bool) iter.SliceIter[T] {
-	// As the field emptyChain is simple, doing this is litte faster,
-	// though logically unsuitable.
-	w.emptyChain = false
 	w.funcChain = append(w.funcChain, filterFunc)
 	return w
 }
 
 // Map will register a mapFunc, which is lazy.
 func (w *wrapper[T]) Map(mapFunc func(*T)) iter.SliceIter[T] {
-	w.emptyChain = false
 	w.funcChain = append(w.funcChain, mapFunc)
 	return w
 }
@@ -164,35 +165,39 @@ func (w *wrapper[T]) Collect() []T {
 	return collected
 }
 
-// TODO: whether save Sum or not
+// TODO: consider use int64 uint64 float64 complex128 to handle
+// of user self-build function to handle
+// Should in another go file
 func Sum[T operatable](slice []T) int64 {
 	return int64(0)
 }
 
 type operatable interface {
-	// TODO: finish this
+	// TODO: consider
 	~uint8 | ~int8 | ~uint16 | ~int16 | ~uint32 |
 		~int32 | ~uint64 | ~int64 | ~uint | ~int |
 		~float32 | ~float64 | ~complex64 | ~complex128
 }
 
 func exec_funcChain[T any](b *wrapper[T]) {
-	if b.emptyChain {
-		b.collected = append(b.collected, b.inner...)
-		return
-	}
 	for _, chainFunc := range b.funcChain {
 		switch t := chainFunc.(type) {
 		case /* map functions */ func(*T):
 			for i := b.start; i < b.end; i++ {
-				t(&b.inner[i])
+				t(&b.collected[i])
 			}
 		case /* fliter functions */ func(T) bool:
+			recollect := make([]T, 0, 5)
+			collectN := 0
 			for i := b.start; i < b.end; i++ {
-				if t(b.inner[i]) {
-					b.collected = append(b.collected, b.inner[i])
+				if t(b.collected[i]) {
+					recollect = append(recollect, b.collected[i])
+					collectN++
 				}
 			}
+			copy(b.collected, recollect)
+			b.collected = b.collected[:collectN]
+			b.start, b.end = 0, collectN
 		default:
 			logger.Error("unmatched func type")
 		}
