@@ -1,4 +1,4 @@
-package iter
+package test
 
 import (
 	"fmt"
