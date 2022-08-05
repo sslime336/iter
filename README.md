@@ -73,7 +73,7 @@ func main() {
 
 ### Logger
 
-A WeakLogger interface are provided for inner use, which means you can customize the log output using your favorite logger.
+A WeakLogger interface is provided for inner use, which means you can customize the log output using your favorite logger.
 
 ```go
 package main
