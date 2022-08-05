@@ -53,6 +53,7 @@ package main
 
 import (
 	"github.com/sslime336/iter"
+	"github.com/sslime336/iter/hashmap"
 	"github.com/sslime336/iter/slice"
 )
 
@@ -64,9 +65,24 @@ func (s *numbers) Iter() iter.SliceIter[int] {
 	return slice.Iter(s.inner)
 }
 
+type grades struct {
+	inner map[string]string
+}
+
+func (s *grades) Iter() iter.HashMapIter[string, string] {
+	return hashmap.Iter(s.inner)
+}
+
 func main() {
 	numberIter := numbers{inner: []int{1, 2, 3, 4, 5}}
 	var _ iter.SliceIter[int] = numberIter.Iter()
+
+	gradesIter := grades{inner: map[string]string{
+		"Alice": "A",
+		"Bob":   "B+",
+		"Foo":   "C",
+	}}
+	var _ iter.HashMapIter[string, string] = gradesIter.Iter()
 }
 
 ```
