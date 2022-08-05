@@ -11,3 +11,5 @@ Since all of these are experimental, this module should not be used in productiv
 ### Misc
 
 Keep updating(maybe)...
+
+The version supporting the production environment is under testing.
