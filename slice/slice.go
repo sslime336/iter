@@ -8,7 +8,7 @@ import (
 )
 
 func Iter[T any](sli []T) iter.SliceIter[T] {
-	return &Wrapper[T]{
+	return &wrapper[T]{
 		inner:      sli,
 		start:      0,
 		end:        len(sli),
@@ -18,7 +18,7 @@ func Iter[T any](sli []T) iter.SliceIter[T] {
 	}
 }
 
-type Wrapper[T any] struct {
+type wrapper[T any] struct {
 	inner      []T
 	start, end int
 	funcChain  []any
@@ -27,7 +27,7 @@ type Wrapper[T any] struct {
 }
 
 // Next is useless now?
-func (w *Wrapper[T]) Next() (*T, bool) {
+func (w *wrapper[T]) Next() (*T, bool) {
 	if w.start < w.end {
 		w.start++
 		return &w.inner[w.start], true
@@ -35,11 +35,11 @@ func (w *Wrapper[T]) Next() (*T, bool) {
 	return nil, false
 }
 
-func (w *Wrapper[T]) Unwrap() []T {
+func (w *wrapper[T]) Unwrap() []T {
 	return w.inner
 }
 
-func (w *Wrapper[T]) Range(start, end int) iter.SliceIter[T] {
+func (w *wrapper[T]) Range(start, end int) iter.SliceIter[T] {
 	defer func() {
 		if p := recover(); p != nil {
 			logger.Error(p)
@@ -52,7 +52,7 @@ func (w *Wrapper[T]) Range(start, end int) iter.SliceIter[T] {
 	return w
 }
 
-func (w *Wrapper[T]) Filter(filterFunc func(T) bool) iter.SliceIter[T] {
+func (w *wrapper[T]) Filter(filterFunc func(T) bool) iter.SliceIter[T] {
 	// As the field emptyChain is simple, doing this is litte faster,
 	// though logically unsuitable.
 	w.emptyChain = false
@@ -60,13 +60,13 @@ func (w *Wrapper[T]) Filter(filterFunc func(T) bool) iter.SliceIter[T] {
 	return w
 }
 
-func (w *Wrapper[T]) Map(mapFunc func(*T)) iter.SliceIter[T] {
+func (w *wrapper[T]) Map(mapFunc func(*T)) iter.SliceIter[T] {
 	w.emptyChain = false
 	w.funcChain = append(w.funcChain, mapFunc)
 	return w
 }
 
-func (w *Wrapper[T]) ForEach(handle func(*T)) {
+func (w *wrapper[T]) ForEach(handle func(*T)) {
 	exec_funcChain(w)
 	for i := w.start; i < w.end; i++ {
 		handle(&w.inner[i])
@@ -75,7 +75,7 @@ func (w *Wrapper[T]) ForEach(handle func(*T)) {
 
 // FindPtr will return the pointer of the found value.
 // Return nil and false if not found.
-func (w *Wrapper[T]) FindPtr(qualified func(T) bool) (*T, bool) {
+func (w *wrapper[T]) FindPtr(qualified func(T) bool) (*T, bool) {
 	exec_funcChain(w)
 	for i := w.start; i < w.end; i++ {
 		if qualified(w.inner[i]) {
@@ -87,7 +87,7 @@ func (w *Wrapper[T]) FindPtr(qualified func(T) bool) (*T, bool) {
 
 // Find will return the copy of the T, if found, the param `found`
 // will be true
-func (w *Wrapper[T]) Find(qualified func(T) bool) (res T, found bool) {
+func (w *wrapper[T]) Find(qualified func(T) bool) (res T, found bool) {
 	exec_funcChain(w)
 	for i := w.start; i < w.end; i++ {
 		if qualified(w.inner[i]) {
@@ -98,7 +98,7 @@ func (w *Wrapper[T]) Find(qualified func(T) bool) (res T, found bool) {
 	return
 }
 
-func (w *Wrapper[T]) Count() int {
+func (w *wrapper[T]) Count() int {
 	exec_funcChain(w)
 	return len(w.collected)
 }
@@ -141,8 +141,8 @@ func Zip[K comparable, V any](keys []K, vals []V) (map[K]V, error) {
 }
 
 // Collect will return the current slice, which has been copied from
-// the Wrapper's inner(that has been dealed with chainFuncs).
-func (w *Wrapper[T]) Collect() []T {
+// the wrapper's inner(that has been dealed with chainFuncs).
+func (w *wrapper[T]) Collect() []T {
 	exec_funcChain(w)
 	collected := make([]T, len(w.collected))
 	copy(collected, w.collected)
@@ -161,7 +161,7 @@ type operatable interface {
 		~float32 | ~float64 | ~complex64 | ~complex128
 }
 
-func exec_funcChain[T any](b *Wrapper[T]) {
+func exec_funcChain[T any](b *wrapper[T]) {
 	if b.emptyChain {
 		b.collected = append(b.collected, b.inner...)
 		return

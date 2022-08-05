@@ -1,8 +1,11 @@
 package iter
 
 type Iterator[T any] interface {
-	// SliceIter[T]
-	// HashMapIter[K, V]
+	Iter() SliceIter[T]
+}
+
+type Iterator2[K comparable, V any] interface {
+	Iter() HashMapIter[K, V]
 }
 
 type SliceIter[T any] interface {
@@ -18,7 +21,6 @@ type SliceIter[T any] interface {
 	Unwrap() []T
 }
 
-// TODO: save or not
 type HashMapIter[K comparable, V any] interface {
 	Keys() SliceIter[K]
 	Values() SliceIter[V]

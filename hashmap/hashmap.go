@@ -6,13 +6,13 @@ import (
 )
 
 func Iter[K comparable, V any](m map[K]V) iter.HashMapIter[K, V] {
-	return &Wrapper[K, V]{
+	return &wrapper[K, V]{
 		inner:  m,
 		volume: len(m),
 	}
 }
 
-type Wrapper[K comparable, V any] struct {
+type wrapper[K comparable, V any] struct {
 	inner  map[K]V
 	volume int
 	curKey K
@@ -21,17 +21,17 @@ type Wrapper[K comparable, V any] struct {
 
 // TODO: as this do not guarantee the order of the inner elements,
 // keeping this method or not is under consideration.
-func (w *Wrapper[K, V]) Next() iter.HashMapIter[K, V] {
+func (w *wrapper[K, V]) Next() iter.HashMapIter[K, V] {
 	return nil
 }
 
-func (w *Wrapper[K, V]) Unwrap() (key K, val V) {
+func (w *wrapper[K, V]) Unwrap() (key K, val V) {
 	key = w.curKey
 	val = w.curVal
 	return
 }
 
-func (w *Wrapper[K, V]) Keys() iter.SliceIter[K] {
+func (w *wrapper[K, V]) Keys() iter.SliceIter[K] {
 	keys := make([]K, 0, w.volume)
 	for key := range w.inner {
 		keys = append(keys, key)
@@ -39,7 +39,7 @@ func (w *Wrapper[K, V]) Keys() iter.SliceIter[K] {
 	return slice.Iter(keys)
 }
 
-func (w *Wrapper[K, V]) Values() iter.SliceIter[V] {
+func (w *wrapper[K, V]) Values() iter.SliceIter[V] {
 	values := make([]V, 0, w.volume)
 	for _, val := range w.inner {
 		values = append(values, val)
