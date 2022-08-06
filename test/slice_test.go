@@ -147,3 +147,13 @@ func TestFind(t *testing.T) {
 		fmt.Println(num)
 	}
 }
+
+func TestSum(t *testing.T) {
+	fmt.Println(slice.Sum(nums))
+}
+
+var imageNums = []complex64{complex(1, 0), complex(-1, 3), complex(1, -1), complex(0, 3)}
+
+func TestSum2(t *testing.T) {
+	fmt.Println(slice.Sum2(imageNums))
+}

@@ -165,18 +165,34 @@ func (w *wrapper[T]) Collect() []T {
 	return collected
 }
 
-// TODO: consider use int64 uint64 float64 complex128 to handle
-// of user self-build function to handle
-// Should in another go file
-func Sum[T operatable](slice []T) int64 {
-	return int64(0)
+// Sum return the sum of the given slice.
+func Sum[T operatable](slice []T) (sum float64) {
+	for i := 0; i < len(slice); i++ {
+		sum += float64(slice[i])
+	}
+	return
+}
+
+// Sum2 return the sum of the given slice, which elements are
+// imaginary number.
+func Sum2[T operatable2](slice []T) (sum complex128) {
+	for i := 0; i < len(slice); i++ {
+		sum += complex128(slice[i])
+	}
+	return
 }
 
 type operatable interface {
-	// TODO: consider
-	~uint8 | ~int8 | ~uint16 | ~int16 | ~uint32 |
-		~int32 | ~uint64 | ~int64 | ~uint | ~int |
-		~float32 | ~float64 | ~complex64 | ~complex128
+	~uint | ~int |
+		~uint8 | ~int8 |
+		~uint16 | ~int16 |
+		~uint32 | ~int32 |
+		~uint64 | ~int64 |
+		~float32 | ~float64
+}
+
+type operatable2 interface {
+	~complex64 | ~complex128
 }
 
 func exec_funcChain[T any](b *wrapper[T]) {
