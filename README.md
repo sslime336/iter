@@ -12,7 +12,7 @@ Since all of these are experimental, this module should not be used in productiv
 
 ### Examples
 
-There are 2 ways to get the iterator.
+#### There are 2 ways to get the iterator.
 1. Generate from existed slice, array or map.
 2. Implement the Iterator interface. You can easily implement the interface by using the function Iter(any) from relevant package.
 
@@ -88,6 +88,8 @@ func main() {
 }
 
 ```
+
+#### You can also see some examples over [here](./examples/demo.go).
 
 ### Logger
 
