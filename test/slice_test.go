@@ -157,3 +157,20 @@ var imageNums = []complex64{complex(1, 0), complex(-1, 3), complex(1, -1), compl
 func TestSum2(t *testing.T) {
 	fmt.Println(slice.Sum2(imageNums))
 }
+
+func TestMutiChainFunc(t *testing.T) {
+	usersIter := slice.Iter(users)
+	users := usersIter.
+		Filter(func(u user) bool {
+			return len(u.name) < 4
+		}).
+		Map(func(t *user) {
+			t.name = "###NONAME"
+		}).
+		Filter(func(u user) bool {
+			return u.age < 30
+		}).Collect()
+	slice.Iter(users).ForEach(func(t *user) {
+		fmt.Printf("%+v\n", *t)
+	})
+}

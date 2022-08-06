@@ -25,4 +25,6 @@ type SliceIter[T any] interface {
 type HashMapIter[K comparable, V any] interface {
 	Keys() SliceIter[K]
 	Values() SliceIter[V]
+	Next() bool
+	Element() (K, V)
 }
