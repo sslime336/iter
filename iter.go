@@ -8,6 +8,10 @@ type Iterator2[K comparable, V any] interface {
 	Iter() HashMapIter[K, V]
 }
 
+type Iterator3[T any] interface {
+	Iter() ChannelIter[T]
+}
+
 type SliceIter[T any] interface {
 	Next() bool
 	Element() (T, bool)
