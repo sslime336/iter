@@ -32,8 +32,12 @@ func (w *wrapper[K, V]) Next() (exists bool) {
 	return
 }
 
-func (w *wrapper[K, V]) Element() (key K, value V) {
-	return w.curKey, w.curVal
+func (w *wrapper[K, V]) Element() (key K, value V, ok bool) {
+	if w.idx < w.volume {
+		key, value = w.curKey, w.curVal
+		ok = true
+	}
+	return
 }
 
 func (w *wrapper[K, V]) Unwrap() map[K]V {
