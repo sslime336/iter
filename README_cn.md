@@ -88,8 +88,6 @@ func main() {
 
 ```
 
-#### 使用示例请[点击这里](./examples/demo.go)
-
 ### Logger
 
 模块提供了一个 WeakLogger 接口，以在迭代过程中使用你喜欢的日志框架格式化日志信息
