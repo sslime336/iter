@@ -106,7 +106,3 @@ func main() {
 }
 
 ```
-
-### Misc
-
-Keep updating(maybe, may not)...
